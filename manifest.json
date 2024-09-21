@@ -3,11 +3,6 @@
     "version": "1.0.0",
     "manifest_version": 3,
     "description": "Keep the position of tabs like 'Web', 'Images', 'Shopping', etc. in Google search results consistently fixed.",
-    "icons": {
-        "16": "assets/icon_16.png",
-        "48": "assets/icon_48.png", 
-        "128": "assets/icon_128.png"
-    },
     "action": {
         "default_popup": "popup/settings.html"
     },
