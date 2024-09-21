@@ -11,13 +11,13 @@
     },
     "permissions": [
         "storage",
-        "tabs",
-        "webNavigation"
+        "tabs"
     ],
     "content_scripts": [
         {
             "matches": [
-                "https://www.google.com/search?q=*"
+                "https://www.google.com/*",
+                "https://www.google.co.jp/*"
             ],
             "js": [
                 "js/utils.js",

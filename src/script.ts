@@ -1,60 +1,54 @@
-function generateElem(url: string, currentParamVal: string) {
+function getLuminance(r: number, g: number, b: number): number {
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+function isDarkMode(backgroundColor: string): boolean {
+    const rgb = backgroundColor.match(/\d+/g)!.map(Number);
+    const luminance = getLuminance(rgb[0], rgb[1], rgb[2]);
+    return luminance < 128;
+}
+
+async function generateElem(url: string, currentParamVal: string): Promise<HTMLElement> {
     const tabs = [
         { name: 'すべて', val: "udm=1" },
         { name: 'ウェブ', val: "udm=14" },
         { name: '画像', val: "udm=2" },
-        { name: '動画', val: "tbm=vid" }
+        { name: '動画', val: "tbm=vid" },
+        { name: 'ショッピング', val: "tbm=shop"},
+        { name: 'ニュース', val: "tbm=nws"},
+        { name: '書籍', val: "tbm=bks"},
+        { name: '地図', val: "maps"},
+        { name: 'フライト', val: "travel/flights"},
+        { name: '金融', val: null},
     ];
 
+    const bodyElement = await searchForElement("body") as HTMLElement;
+    const backgroundColor = window.getComputedStyle(bodyElement).backgroundColor;
+    
     const newElement = document.createElement('div');
-    newElement.className = 'navbar';
+    newElement.className = 'tabsfixer-container';
+    if (isDarkMode(backgroundColor)) {
+        newElement.classList.add("darkmode")
+    }
 
     tabs.forEach(tabData => {
         const tab = document.createElement('a');
-        tab.textContent = tabData.name;
-        tab.href = url + "&" + tabData.val
         tab.className = 'tab';
+        tab.textContent = tabData.name;
+
+        let href = url + "&" + tabData.val;
+        if (tabData.val && !tabData.val?.includes("=")) {
+            href = url.replace("search", tabData.val);
+        }
+        tab.href = href;
         if (tabData.val == currentParamVal) {
             tab.classList.add('active');
         }
         tab.addEventListener('click', (event) => {
             event.preventDefault();
-            window.location.href = url + "&" + tabData.val;
+            window.location.href = href;
         });
         newElement.appendChild(tab);
-    });
-
-    newElement.style.display = 'flex';
-    newElement.style.borderBottom = '1px solid #ddd';
-    newElement.style.backgroundColor = '#1f1f1f';
-
-    Array.from(newElement.getElementsByClassName('tab')).forEach(tab => {
-        if (tab instanceof HTMLElement) {
-            tab.style.padding = '10px 20px';
-            tab.style.textDecoration = 'none';
-            tab.style.color = '#9aa0a6';
-            if (tab.classList.contains("active")) {
-                tab.style.color = "#1a73e8"
-                tab.style.borderBottom = "3px solid #1a73e8"
-            }
-            tab.style.fontSize = '14px';
-            tab.style.fontWeight = 'bold';
-            tab.style.cursor = 'pointer';
-            tab.addEventListener('mouseenter', () => {
-                if (!tab.classList.contains("active")) {
-                    tab.style.color = "#e8e8e8"
-                    tab.style.borderBottom = '3px solid #e8e8e8';
-                }
-            });
-            tab.addEventListener('mouseleave', () => {
-                tab.style.color = '#555';
-                if (tab.classList.contains("active")) {
-                    tab.style.color = "#1a73e8"
-                } else {
-                    tab.style.borderBottom = 'none';
-                }
-            });
-        }
     });
     return newElement;
 }
@@ -84,7 +78,7 @@ function getCurrentUrl() {
 
 async function googleModifier() {
     const [currentUrl, currentParamVal] = getCurrentUrl();
-    let classname = (currentParamVal == "tbm=vid") ? ".sSeWs" : ".qogDvd" ;
+    let classname = currentParamVal.startsWith("tbm") ? ".sSeWs" : ".qogDvd" ;
     const targetElem = await searchForElement(classname, 800, 3);
     if (targetElem != null) {
         const firstChild = targetElem.firstElementChild;
@@ -92,7 +86,7 @@ async function googleModifier() {
             targetElem.removeChild(firstChild);
         }
 
-        const newElem = generateElem(currentUrl, currentParamVal);
+        const newElem = await generateElem(currentUrl, currentParamVal);
         targetElem.prepend(newElem);
     }
 }
