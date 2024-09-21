@@ -1,13 +1,12 @@
 async function TabsBoxHandler() {
 
     const tabsBox = await searchForElement('.tabs-box') as HTMLElement;
-    const tabsBoxRect = tabsBox.getBoundingClientRect();
-    const tabsBoxTop = tabsBoxRect.top
-    const tabsBoxBottom = tabsBoxRect.bottom
-    
     const tabList = tabsBox.querySelectorAll('div');
     const tabBar = tabsBox.querySelector('.tab-bar') as HTMLElement;
     
+    let tabsBoxTop = 0
+    let tabsBoxBottom = 0
+
     interface Data {
         target: HTMLElement | null;
         diffY: number;
@@ -100,22 +99,28 @@ async function TabsBoxHandler() {
     };
 
     const ev = {
-        down(e: MouseEvent): void {
+        async down(e: MouseEvent): Promise<void> {
             if (data.target) { return }
 
             const target = e.target as HTMLElement;
             if (target == tabBar) { return }
+
+            const tabsBoxRect = (await searchForElement('.tabs-box') as HTMLElement).getBoundingClientRect();
+            tabsBoxTop = tabsBoxRect.top
+            tabsBoxBottom = tabsBoxRect.bottom
 
             const pageY = e.pageY;
             const rect = target.getBoundingClientRect();
             const style = window.getComputedStyle(target);
             const paddingLeft = parseFloat(style.paddingLeft);
             const targetW = rect.width - 2*paddingLeft;
-            
+            const targetPosT = rect.top
+
             data.target = target;
             data.diffY = pageY - rect.top;
             data.cloneName = util.insertClone(target, util.index(target));
             target.style.width = `${targetW}px`;
+            target.style.top = `${targetPosT}px`;
             target.classList.add('onGrab');
             window.addEventListener('mousemove', ev.move);
             window.addEventListener('mouseup', ev.up);
@@ -125,8 +130,9 @@ async function TabsBoxHandler() {
             if (!target) return;
 
             const pageY = e.pageY;
+            const targetH = target.offsetHeight
             const targetPosT = pageY - data.diffY;
-            if (!(tabsBoxTop < targetPosT && targetPosT < tabsBoxBottom-target.offsetHeight)) { return }
+            if (!(tabsBoxTop < targetPosT && targetPosT < tabsBoxBottom-targetH)) { return }
 
             target.style.top = `${targetPosT}px`;
             util.swap(target);
