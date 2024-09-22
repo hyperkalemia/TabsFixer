@@ -8,51 +8,6 @@ function isDarkMode(backgroundColor: string): boolean {
     return luminance < 128;
 }
 
-async function generateElem(url: string, currentParamVal: string): Promise<HTMLElement> {
-    const tabs = [
-        { name: 'すべて', val: "udm=1" },
-        { name: 'ウェブ', val: "udm=14" },
-        { name: '画像', val: "udm=2" },
-        { name: '動画', val: "tbm=vid" },
-        { name: 'ショッピング', val: "tbm=shop"},
-        { name: 'ニュース', val: "tbm=nws"},
-        { name: '書籍', val: "tbm=bks"},
-        { name: '地図', val: "maps"},
-        { name: 'フライト', val: "travel/flights"},
-        { name: '金融', val: null},
-    ];
-
-    const bodyElement = await searchForElement("body") as HTMLElement;
-    const backgroundColor = window.getComputedStyle(bodyElement).backgroundColor;
-    
-    const newElement = document.createElement('div');
-    newElement.className = 'tabsfixer-container';
-    if (isDarkMode(backgroundColor)) {
-        newElement.classList.add("darkmode")
-    }
-
-    tabs.forEach(tabData => {
-        const tab = document.createElement('a');
-        tab.className = 'tab';
-        tab.textContent = tabData.name;
-
-        let href = url + "&" + tabData.val;
-        if (tabData.val && !tabData.val?.includes("=")) {
-            href = url.replace("search", tabData.val);
-        }
-        tab.href = href;
-        if (tabData.val == currentParamVal) {
-            tab.classList.add('active');
-        }
-        tab.addEventListener('click', (event) => {
-            event.preventDefault();
-            window.location.href = href;
-        });
-        newElement.appendChild(tab);
-    });
-    return newElement;
-}
-
 function getCurrentUrl() {
     const currentUrl = new URL(window.location.href);
     const searchParams = new URLSearchParams(currentUrl.search);
@@ -76,7 +31,45 @@ function getCurrentUrl() {
     return [cleanUrl, currentParamVal];
 }
 
-async function googleModifier() {
+async function generateElem(url: string, currentParamVal: string): Promise<HTMLElement> {
+
+    const bodyElement = await searchForElement("body") as HTMLElement;
+    const backgroundColor = window.getComputedStyle(bodyElement).backgroundColor;
+    
+    const newElement = document.createElement('div');
+    newElement.className = 'tabsfixer-container';
+    if (isDarkMode(backgroundColor)) {
+        newElement.classList.add("darkmode")
+    }
+
+    const tabsOrder = defaultTabsOrder;
+    // chrome.storage.local.get() で得られた配列を代入
+
+    tabsOrder.forEach(tabClass => {
+        if (!tabsData[tabClass]) { return; }
+
+        const tab = document.createElement('a');
+        tab.className = 'tab';
+        if (tabsData[tabClass].val == currentParamVal) {
+            tab.classList.add('active');
+        }
+        let href = url + "&" + tabsData[tabClass].val;
+        if (tabsData[tabClass].val && !tabsData[tabClass].val.includes("=")) {
+            href = url.replace("search", tabsData[tabClass].val);
+        }
+        tab.textContent = tabsData[tabClass]?.label;
+        tab.href = href;
+
+        tab.addEventListener('click', (event) => {
+            event.preventDefault();
+            window.location.href = href;
+        });
+        newElement.appendChild(tab);
+    });
+    return newElement;
+}
+
+async function main() {
     const [currentUrl, currentParamVal] = getCurrentUrl();
     let classname = currentParamVal.startsWith("tbm") ? ".sSeWs" : ".qogDvd" ;
     const targetElem = await searchForElement(classname, 800, 3);
@@ -90,4 +83,9 @@ async function googleModifier() {
         targetElem.prepend(newElem);
     }
 }
-(async () => { await googleModifier(); })();
+
+if (document.readyState !== "loading") {
+    (async () => { await main() })();
+} else {
+    document.addEventListener("DOMContentLoaded", main);
+}
