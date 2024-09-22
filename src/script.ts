@@ -16,7 +16,7 @@ function getCurrentUrl() {
     if (qValue !== null) {
         newUrl.searchParams.append('q', qValue);
     }
-    let currentParamVal = "udm=1";
+    let currentParamVal = "search";
     const udmValue = searchParams.get("udm");
     if (udmValue !== null) {
         currentParamVal = "udm=" + udmValue;

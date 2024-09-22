@@ -74,7 +74,7 @@ type TabDataType = {
 }
 
 const tabsData: TabDataType = {
-    "tab-all": { label: "すべて", val: "udm=1" },
+    "tab-all": { label: "すべて", val: "search" },
     "tab-web": { label: "ウェブ", val: "udm=14" },
     "tab-picture": { label: "画像", val: "udm=2" },
     "tab-video": { label: "動画", val: "tbm=vid" },
