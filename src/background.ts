@@ -7,7 +7,7 @@ chrome.runtime.onMessage.addListener((request: RequestMessageType, sender) => {
         chrome.tabs.query({ url: ["https://www.google.com/*", "https://www.google.co.jp/*"] }, (tabs) => {
             tabs.forEach((tab) => {
                 const id = tab.id!;
-                chrome.tabs.sendMessage<RequestMessageType>(id, request);
+                (async () => { await chrome.tabs.sendMessage<RequestMessageType>(id, request); })();
             })
         });
     }

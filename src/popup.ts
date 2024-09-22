@@ -1,31 +1,41 @@
-async function TabsBoxHandler() {
+class TabsBoxHandler {
+    private tabsBox: HTMLElement;
+    private tabList: NodeListOf<HTMLElement>;
+    private tabBar: HTMLElement;
+    private tabsBoxTop: number = 0;
+    private tabsBoxBottom: number = 0;
 
-    const tabsBox = await searchForElement('.tabs-box') as HTMLElement;
-    const tabList = tabsBox.querySelectorAll('div');
-    const tabBar = tabsBox.querySelector('.tab-bar') as HTMLElement;
-    
-    let tabsBoxTop = 0
-    let tabsBoxBottom = 0
-
-    interface Data {
+    private data: {
         target: HTMLElement | null;
         diffY: number;
         cloneName?: string;
-    }
-
-    const data: Data = {
+    } = {
         target: null,
         diffY: 0,
     };
 
-    const util = {
-        index(el: HTMLElement): number {
+    constructor() {
+        this.init();
+    }
+
+    private async init() {
+        this.tabsBox = await searchForElement('.tabs-box') as HTMLElement;
+        this.tabList = this.tabsBox.querySelectorAll('div');
+        this.tabBar = this.tabsBox.querySelector('.tab-bar') as HTMLElement;
+
+        this.tabList.forEach((el) => {
+            el.addEventListener('mousedown', this.ev.down.bind(this));
+        });
+    }
+
+    public util = {
+        index: (el: HTMLElement): number => {
             const parent = el.parentElement;
             if (!parent) return -1;
             const siblings = Array.from(parent.children);
             return siblings.indexOf(el);
         },
-        insertClone(target: HTMLElement, insertIdx: number): string {
+        insertClone: (target: HTMLElement, insertIdx: number): string => {
             const cloneName = `TabItemClone_${Math.trunc(Math.random() * 10000)}`;
             const clone = target.cloneNode(true) as HTMLElement;
             const parent = target.parentElement;
@@ -37,13 +47,13 @@ async function TabsBoxHandler() {
 
             return cloneName;
         },
-        swap(target: HTMLElement): void {
-            const selfIdx = util.index(target);
+        swap: (target: HTMLElement): void => {
+            const selfIdx = this.util.index(target);
             const cloneIdx = selfIdx + 1;
             const parent = target.parentElement;
             if (!parent) return;
 
-            const siblings = parent.querySelectorAll(`:scope > *:not(.onGrab):not(.${data.cloneName})`);
+            const siblings = parent.querySelectorAll(`:scope > *:not(.onGrab):not(.${this.data.cloneName})`);
 
             for (let thatIdx = 0; thatIdx < siblings.length; thatIdx++) {
                 const targetH = target.offsetHeight;
@@ -63,85 +73,92 @@ async function TabsBoxHandler() {
 
                     parent.insertBefore(clone, selfIdx > thatIdx ? that : that.nextSibling);
                     parent.insertBefore(target, clone);
-                    util.toggle(target);
+                    this.util.toggle(target);
                     break;
                 }
             }
         },
-        toggle(target: HTMLElement): void {
-            if (util.index(target) > util.index(tabBar) && !target.classList.contains("inactive")) {
+        toggle: (target: HTMLElement): void => {
+            if (this.util.index(target) > this.util.index(this.tabBar) && !target.classList.contains("inactive")) {
                 target.classList.add('inactive');
-            } else if (util.index(target) < util.index(tabBar) && target.classList.contains("inactive")) {
+            } else if (this.util.index(target) < this.util.index(this.tabBar) && target.classList.contains("inactive")) {
                 target.classList.remove('inactive');
             }
         },
-        sortByOrder(order: TabClassesType[]): void {
-            const items = Array.from(tabsBox.children) as HTMLElement[];
-            const sortedItems = order.map(className => 
-                items.find(item => item.classList.contains(className))
-            ).filter(Boolean) as HTMLElement[];
-
-            sortedItems.forEach(item => {
-                tabsBox.appendChild(item);
-            });
-            sortedItems.forEach(item => {
-                util.toggle(item);
-            });
-        },
-        getCurrentOrder(): TabClassesType[] {
-            const items = Array.from(tabsBox.children) as HTMLElement[];
+        getCurrentOrder: (): TabClassesType[] => {
+            const items = Array.from(this.tabsBox.children) as HTMLElement[];
             const currentOrder = items.map(item => 
-                Array.from(item.classList).filter((className) =>
+                (Array.from(item.classList).filter((className) =>
                     isTabClassesType(className)
-                ) as TabClassesType[] )[0];
-            return currentOrder
-        }
+                ) as TabClassesType[])[0]);
+            return currentOrder;
+        },
+        sortByOrder: async (order: TabClassesType[], save: boolean = true): Promise<void> => {
+            const items = Array.from(this.tabsBox.children) as HTMLElement[];
+            order.forEach(className => {
+                const elem = items.find(item => item.classList.contains(className));
+                if (elem instanceof HTMLElement) { this.tabsBox.appendChild(elem) }
+            })
+            items.forEach(item => {
+                this.util.toggle(item as HTMLElement);
+            });
+            if (save) { await this.util.save(); }
+        },
+        save: async (): Promise<void> => {
+            const currentOrder = this.util.getCurrentOrder();
+            await setLocalValue("TabsArray", currentOrder);
+            await chrome.runtime.sendMessage<RequestMessageType>({
+                target: "background",
+                key: "TabsArray",
+                value: currentOrder
+            });
+        } 
     };
 
-    const ev = {
-        async down(e: MouseEvent): Promise<void> {
-            if (data.target) { return }
+    private ev = {
+        down: async (e: MouseEvent): Promise<void> => {
+            if (this.data.target) { return }
 
             const target = e.target as HTMLElement;
-            if (target == tabBar) { return }
+            if (target === this.tabBar) { return }
 
             const tabsBoxRect = (await searchForElement('.tabs-box') as HTMLElement).getBoundingClientRect();
-            tabsBoxTop = tabsBoxRect.top
-            tabsBoxBottom = tabsBoxRect.bottom
+            this.tabsBoxTop = tabsBoxRect.top;
+            this.tabsBoxBottom = tabsBoxRect.bottom;
 
             const pageY = e.pageY;
             const rect = target.getBoundingClientRect();
             const style = window.getComputedStyle(target);
             const paddingLeft = parseFloat(style.paddingLeft);
-            const targetW = rect.width - 2*paddingLeft;
-            const targetPosT = rect.top
+            const targetW = rect.width - 2 * paddingLeft;
+            const targetPosT = rect.top;
 
-            data.target = target;
-            data.diffY = pageY - rect.top;
-            data.cloneName = util.insertClone(target, util.index(target));
+            this.data.target = target;
+            this.data.diffY = pageY - rect.top;
+            this.data.cloneName = this.util.insertClone(target, this.util.index(target));
             target.style.width = `${targetW}px`;
             target.style.top = `${targetPosT}px`;
             target.classList.add('onGrab');
-            window.addEventListener('mousemove', ev.move);
-            window.addEventListener('mouseup', ev.up);
+            window.addEventListener('mousemove', this.ev.move.bind(this));
+            window.addEventListener('mouseup', this.ev.up.bind(this));
         },
-        move(e: MouseEvent): void {
-            const target = data.target;
+        move: (e: MouseEvent): void => {
+            const target = this.data.target;
             if (!target) return;
 
             const pageY = e.pageY;
-            const targetH = target.offsetHeight
-            const targetPosT = pageY - data.diffY;
-            if (!(tabsBoxTop < targetPosT && targetPosT < tabsBoxBottom-targetH)) { return }
+            const targetH = target.offsetHeight;
+            const targetPosT = pageY - this.data.diffY;
+            if (!(this.tabsBoxTop < targetPosT && targetPosT < this.tabsBoxBottom - targetH)) { return }
 
             target.style.top = `${targetPosT}px`;
-            util.swap(target);
+            this.util.swap(target);
         },
-        async up(): Promise<void> {
-            const target = data.target;
+        up: async (): Promise<void> => {
+            const target = this.data.target;
             if (!target) return;
 
-            const cloneSelector = `.${data.cloneName}`;
+            const cloneSelector = `.${this.data.cloneName}`;
             const clone = document.querySelector(cloneSelector) as HTMLElement;
 
             if (clone) {
@@ -151,42 +168,30 @@ async function TabsBoxHandler() {
             target.removeAttribute('style');
             target.classList.remove('onGrab');
             target.classList.remove('onDrag');
-            window.removeEventListener('mousemove', ev.move);
-            window.removeEventListener('mouseup', ev.up);
-            data.target = null;
+            window.removeEventListener('mousemove', this.ev.move.bind(this));
+            window.removeEventListener('mouseup', this.ev.up.bind(this));
+            this.data.target = null;
 
-            const currentOrder = util.getCurrentOrder();
-            await sendRequestMessage("TabsArray", currentOrder)
-            await chrome.storage.local.set( {"TabsArray": currentOrder} );
+            this.util.save()
         }
     };
-
-    tabList.forEach((el) => {
-        el.addEventListener('mousedown', ev.down);
-    });
-};
-
-async function sendRequestMessage(key: RequestKeysType, value: any) {
-    chrome.runtime.sendMessage<RequestMessageType>({
-        target: "background",
-        key: key,
-        value: value
-    });
 }
 
 document.addEventListener('DOMContentLoaded', async function() {
 
     //initialize
-
-    await TabsBoxHandler()
-
-    const localStorage = await chrome.storage.local.get();
-    const keyIds: string[] = [...RequestKeys];
-    Object.keys(localStorage).forEach((key: string) => {
-        if (keyIds.indexOf(key) !== -1) {
-            if (keyIds.indexOf(key) == 0) {
-                
-            }
+    const tabsBoxHandler = new TabsBoxHandler();
+    RequestKeys.forEach(async (key) => {
+        let localValue = await getLocalValue(key);
+        if (key === "TabsArray") {
+            if (localValue === undefined || !isTabClassesTypeArray(localValue)) { localValue = defaultTabsOrder; }
+            tabsBoxHandler.util.sortByOrder(localValue as TabClassesType[], false)
         }
+    })
+    
+    const resetButton = await searchForElement(".reset") as HTMLElement;
+    resetButton.addEventListener('click', () => {
+        tabsBoxHandler.util.sortByOrder(defaultTabsOrder);
     });
+
 });
