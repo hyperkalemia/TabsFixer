@@ -19,9 +19,9 @@ class TabsBoxHandler {
     }
 
     private async init() {
-        this.tabsBox = await searchForElement('.tabs-box') as HTMLElement;
+        this.tabsBox = (await searchForElement('.tabs-box'))!;
         this.tabList = this.tabsBox.querySelectorAll('div');
-        this.tabBar = this.tabsBox.querySelector('.tab-bar') as HTMLElement;
+        this.tabBar = this.tabsBox.querySelector('.tab-bar')!;
 
         this.tabList.forEach((el) => {
             el.addEventListener('mousedown', this.ev.down.bind(this));
@@ -88,9 +88,7 @@ class TabsBoxHandler {
         getCurrentOrder: (): TabClassesType[] => {
             const items = Array.from(this.tabsBox.children) as HTMLElement[];
             const currentOrder = items.map(item => 
-                (Array.from(item.classList).filter((className) =>
-                    isTabClassesType(className)
-                ) as TabClassesType[])[0]);
+                Array.from(item.classList).filter((className) => isTabClassesType(className))[0]);
             return currentOrder;
         },
         sortByOrder: async (order: TabClassesType[], save: boolean = true): Promise<void> => {
@@ -122,7 +120,7 @@ class TabsBoxHandler {
             const target = e.target as HTMLElement;
             if (target === this.tabBar) { return }
 
-            const tabsBoxRect = (await searchForElement('.tabs-box') as HTMLElement).getBoundingClientRect();
+            const tabsBoxRect = (await searchForElement('.tabs-box'))!.getBoundingClientRect();
             this.tabsBoxTop = tabsBoxRect.top;
             this.tabsBoxBottom = tabsBoxRect.bottom;
 
@@ -182,15 +180,15 @@ document.addEventListener('DOMContentLoaded', async function() {
     //initialize
     const tabsBoxHandler = new TabsBoxHandler();
     RequestKeys.forEach(async (key) => {
-        let localValue = await getLocalValue(key);
+        const localValue: unknown = await getLocalValue(key);
         if (key === "TabsArray") {
-            if (localValue === undefined || !isTabClassesTypeArray(localValue)) { localValue = defaultTabsOrder; }
-            tabsBoxHandler.util.sortByOrder(localValue as TabClassesType[], false)
+            const tabsOrder = isTabClassesTypeArray(localValue) ? localValue : defaultTabsOrder
+            tabsBoxHandler.util.sortByOrder(tabsOrder, false)
         }
     })
     
-    const resetButton = await searchForElement(".reset") as HTMLElement;
-    resetButton.addEventListener('click', () => {
+    const resetButton = await searchForElement(".reset");
+    resetButton!.addEventListener('click', () => {
         tabsBoxHandler.util.sortByOrder(defaultTabsOrder);
     });
 

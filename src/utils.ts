@@ -3,14 +3,19 @@ const RequestKeys = [
     "TabsArray"
 ] as const;
 type RequestKeysType = typeof RequestKeys[number];
-function isRequestKeysType(str: string): boolean {
-    return RequestKeys.indexOf(str as RequestKeysType) !== -1
+function isRequestKeysType(item: any): item is RequestKeysType {
+    return RequestKeys.indexOf(item as RequestKeysType) !== -1
 }
 
-interface RequestMessageType {
+type RequestMessageType = {
     target: "background" | "contentScript",
     key: RequestKeysType,
     value: any
+}
+function isRequestMessageType(item: any): item is RequestMessageType {
+    return !!(item as RequestMessageType)?.target && ["background", "contentScript"].indexOf(item.target) !== -1 &&
+           !!(item as RequestMessageType)?.key && isRequestKeysType(item.key) &&
+           !!(item as RequestMessageType)?.value
 }
 
 const TabClasses = [
@@ -27,15 +32,11 @@ const TabClasses = [
     "tab-bar"
 ] as const;
 type TabClassesType = typeof TabClasses[number];
-function isTabClassesType(str: string): boolean {
-    return TabClasses.indexOf(str as TabClassesType) !== -1
+function isTabClassesType(item: any): item is TabClassesType {
+    return TabClasses.indexOf(item as TabClassesType) !== -1
 }
-function isTabClassesTypeArray(array: any[]): boolean {
-    let res = true; 
-    array.forEach(item => {
-        if (!isTabClassesType(item)) { res = false; }
-    })
-    return res
+function isTabClassesTypeArray(item: any): item is TabClassesType[]  {
+    return Array.isArray(item) && item.every(item => isTabClassesType(item));
 }
 
 const defaultTabsOrder: TabClassesType[] = [
@@ -90,15 +91,15 @@ function debug(...arg: any) {
     console.log("[DEBUG]", ...arg);
 }
 
-async function searchForElement(name: string, intervalMs: number = 1000, maxAttempts: number = 3) {
+async function searchForElement(name: string, intervalMs: number = 1000, maxAttempts: number = 3): Promise<HTMLElement | null> {
     let attempts = 0;
     while (attempts < maxAttempts || maxAttempts === undefined) {
         const element = document.querySelector(name);
-        if (element !== null) { return element; }
+        if (element !== null) { return element as HTMLElement; }
         attempts++;
         await new Promise(resolve => setTimeout(resolve, intervalMs));
     }
-    return null;
+    return null
 }
 
 async function getLocalValue(key: RequestKeysType): Promise<any> {

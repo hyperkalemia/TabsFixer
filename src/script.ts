@@ -33,8 +33,8 @@ function getCurrentUrl() {
 
 async function generateElem(url: string, currentParamVal: string): Promise<HTMLElement> {
 
-    const bodyElement = await searchForElement("body") as HTMLElement;
-    const backgroundColor = window.getComputedStyle(bodyElement).backgroundColor;
+    const bodyElement = await searchForElement("body");
+    const backgroundColor = window.getComputedStyle(bodyElement!).backgroundColor;
     
     const newElement = document.createElement('div');
     newElement.className = 'tabsfixer-container';
@@ -42,11 +42,11 @@ async function generateElem(url: string, currentParamVal: string): Promise<HTMLE
         newElement.classList.add("darkmode")
     }
 
-    let tabsOrder = await getLocalValue("TabsArray");
-    if (tabsOrder === undefined || !isTabClassesTypeArray(tabsOrder)) { tabsOrder = defaultTabsOrder; }
+    const localValue: unknown = await getLocalValue("TabsArray");
+    const tabsOrder = isTabClassesTypeArray(localValue) ? localValue : defaultTabsOrder 
 
     let skip = false;
-    (tabsOrder as TabClassesType[]).forEach(tabClass => {
+    tabsOrder.forEach(tabClass => {
         if (tabClass === "tab-bar") { skip = true; }
         if (skip || !tabsData[tabClass]) { return; }
 
@@ -75,28 +75,23 @@ async function main() {
     const [currentUrl, currentParamVal] = getCurrentUrl();
     let classname = currentParamVal.startsWith("tbm") ? ".sSeWs" : ".qogDvd" ;
     const targetElem = await searchForElement(classname, 800, 3);
-    if (targetElem != null) {
+    if (targetElem) {
         const firstChild = targetElem.firstElementChild;
-        if (firstChild) {
-            targetElem.removeChild(firstChild);
-        }
-
+        if (firstChild) { targetElem.removeChild(firstChild); }
         const newElem = await generateElem(currentUrl, currentParamVal);
         targetElem.prepend(newElem);
     }
 }
 
-if (document.readyState !== "loading") {
-    (async () => { await main() })();
-} else {
-    document.addEventListener("DOMContentLoaded", main);
-}
-
-chrome.runtime.onMessage.addListener((request: RequestMessageType, sender) => {
-    if (sender.id != chrome.runtime.id || request.target != "contentScript") return;
-    if (isRequestKeysType(request.key)) {
-        if (request.key == "TabsArray") {
-            (async () => { await main() })();
-        }
+(async () => {
+    if (document.readyState !== "loading") {
+        await main();
+    } else {
+        document.addEventListener("DOMContentLoaded", main);
     }
+})();
+
+chrome.runtime.onMessage.addListener(async (request: unknown, sender) => {
+    if (sender.id != chrome.runtime.id || !isRequestMessageType(request) ||request.target != "contentScript") { return; }
+    if (request.key == "TabsArray") { await main(); }
 });
