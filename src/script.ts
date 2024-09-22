@@ -42,11 +42,13 @@ async function generateElem(url: string, currentParamVal: string): Promise<HTMLE
         newElement.classList.add("darkmode")
     }
 
-    const tabsOrder = defaultTabsOrder;
-    // chrome.storage.local.get() で得られた配列を代入
+    let tabsOrder = await getLocalValue("TabsArray");
+    if (tabsOrder === undefined || !isTabClassesTypeArray(tabsOrder)) { tabsOrder = defaultTabsOrder; }
 
-    tabsOrder.forEach(tabClass => {
-        if (!tabsData[tabClass]) { return; }
+    let skip = false;
+    (tabsOrder as TabClassesType[]).forEach(tabClass => {
+        if (tabClass === "tab-bar") { skip = true; }
+        if (skip || !tabsData[tabClass]) { return; }
 
         const tab = document.createElement('a');
         tab.className = 'tab';
@@ -89,3 +91,12 @@ if (document.readyState !== "loading") {
 } else {
     document.addEventListener("DOMContentLoaded", main);
 }
+
+chrome.runtime.onMessage.addListener((request: RequestMessageType, sender) => {
+    if (sender.id != chrome.runtime.id || request.target != "contentScript") return;
+    if (isRequestKeysType(request.key)) {
+        if (request.key == "TabsArray") {
+            (async () => { await main() })();
+        }
+    }
+});

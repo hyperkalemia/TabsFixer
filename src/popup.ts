@@ -85,19 +85,6 @@ class TabsBoxHandler {
                 target.classList.remove('inactive');
             }
         },
-        sortByOrder: (order: TabClassesType[]): void => {
-            const items = Array.from(this.tabsBox.children) as HTMLElement[];
-            const sortedItems = order.map(className => 
-                items.find(item => item.classList.contains(className))
-            ).filter(Boolean) as HTMLElement[];
-
-            sortedItems.forEach(item => {
-                this.tabsBox.appendChild(item);
-            });
-            sortedItems.forEach(item => {
-                this.util.toggle(item);
-            });
-        },
         getCurrentOrder: (): TabClassesType[] => {
             const items = Array.from(this.tabsBox.children) as HTMLElement[];
             const currentOrder = items.map(item => 
@@ -105,7 +92,27 @@ class TabsBoxHandler {
                     isTabClassesType(className)
                 ) as TabClassesType[])[0]);
             return currentOrder;
-        }
+        },
+        sortByOrder: async (order: TabClassesType[], save: boolean = true): Promise<void> => {
+            const items = Array.from(this.tabsBox.children) as HTMLElement[];
+            order.forEach(className => {
+                const elem = items.find(item => item.classList.contains(className));
+                if (elem instanceof HTMLElement) { this.tabsBox.appendChild(elem) }
+            })
+            items.forEach(item => {
+                this.util.toggle(item as HTMLElement);
+            });
+            if (save) { await this.util.save(); }
+        },
+        save: async (): Promise<void> => {
+            const currentOrder = this.util.getCurrentOrder();
+            await setLocalValue("TabsArray", currentOrder);
+            await chrome.runtime.sendMessage<RequestMessageType>({
+                target: "background",
+                key: "TabsArray",
+                value: currentOrder
+            });
+        } 
     };
 
     private ev = {
@@ -165,35 +172,26 @@ class TabsBoxHandler {
             window.removeEventListener('mouseup', this.ev.up.bind(this));
             this.data.target = null;
 
-            const currentOrder = this.util.getCurrentOrder();
-            await sendRequestMessage("TabsArray", currentOrder);
-            await chrome.storage.local.set({"TabsArray": currentOrder});
+            this.util.save()
         }
     };
-}
-
-async function sendRequestMessage(key: RequestKeysType, value: any) {
-    chrome.runtime.sendMessage<RequestMessageType>({
-        target: "background",
-        key: key,
-        value: value
-    });
 }
 
 document.addEventListener('DOMContentLoaded', async function() {
 
     //initialize
     const tabsBoxHandler = new TabsBoxHandler();
-    const localStorage = await chrome.storage.local.get();
-    const keyIds: string[] = [...RequestKeys];
-    Object.keys(localStorage).forEach((key: string) => {
-        if (keyIds.indexOf(key) !== -1) {
-            if (keyIds.indexOf(key) == 0) {
-                debug(tabsBoxHandler.util.getCurrentOrder())
-                // tabsBoxHandler.util.sortByOrder()
-            }
+    RequestKeys.forEach(async (key) => {
+        let localValue = await getLocalValue(key);
+        if (key === "TabsArray") {
+            if (localValue === undefined || !isTabClassesTypeArray(localValue)) { localValue = defaultTabsOrder; }
+            tabsBoxHandler.util.sortByOrder(localValue as TabClassesType[], false)
         }
-    });
+    })
     
-    // RequestMessageを受け取った際に tabsBoxHandler.util.sortByOrder()を実行
+    const resetButton = await searchForElement(".reset") as HTMLElement;
+    resetButton.addEventListener('click', () => {
+        tabsBoxHandler.util.sortByOrder(defaultTabsOrder);
+    });
+
 });

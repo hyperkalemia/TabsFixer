@@ -1,21 +1,3 @@
-function debug(...arg: any) {
-    console.log("[DEBUG]", ...arg);
-}
-
-async function searchForElement(name: string, intervalMs: number = 1000, maxAttempts: number = 3) {
-    let attempts = 0;
-    while (attempts < maxAttempts || maxAttempts === undefined) {
-        const element = document.querySelector(name);
-        if (element !== null) {
-            // debug("要素", className, "が見つかりました:", element);
-            return element;
-        }
-        attempts++;
-        await new Promise(resolve => setTimeout(resolve, intervalMs));
-    }
-    // debug("要素が見つかりませんでした");
-    return null;
-}
 
 const RequestKeys = [
     "TabsArray"
@@ -47,6 +29,13 @@ const TabClasses = [
 type TabClassesType = typeof TabClasses[number];
 function isTabClassesType(str: string): boolean {
     return TabClasses.indexOf(str as TabClassesType) !== -1
+}
+function isTabClassesTypeArray(array: any[]): boolean {
+    let res = true; 
+    array.forEach(item => {
+        if (!isTabClassesType(item)) { res = false; }
+    })
+    return res
 }
 
 const defaultTabsOrder: TabClassesType[] = [
@@ -95,4 +84,27 @@ const tabsData: TabDataType = {
     "tab-map": { label: "地図", val: "maps" },
     "tab-flight": { label: "フライト", val: "travel/flights" },
     "tab-finance": { label: "金融", val: null },
+}
+
+function debug(...arg: any) {
+    console.log("[DEBUG]", ...arg);
+}
+
+async function searchForElement(name: string, intervalMs: number = 1000, maxAttempts: number = 3) {
+    let attempts = 0;
+    while (attempts < maxAttempts || maxAttempts === undefined) {
+        const element = document.querySelector(name);
+        if (element !== null) { return element; }
+        attempts++;
+        await new Promise(resolve => setTimeout(resolve, intervalMs));
+    }
+    return null;
+}
+
+async function getLocalValue(key: RequestKeysType): Promise<any> {
+    return await chrome.storage.local.get(key).then(res => res[key])
+}
+
+async function setLocalValue(key: RequestKeysType, value: any) : Promise<void> {
+    await chrome.storage.local.set({ [key]: value })
 }
