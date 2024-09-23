@@ -12,7 +12,8 @@
         "default_popup": "popup/settings.html"
     },
     "background": {
-        "service_worker": "js/background.js"
+        "service_worker": "js/background.js",
+        "type": "module"
     },
     "permissions": [
         "storage",
@@ -25,12 +26,24 @@
                 "https://www.google.co.jp/*"
             ],
             "js": [
-                "js/utils.js",
-                "js/script.js"
+                "js/loader.js"
             ],
             "css": [
                 "css/style.css"
             ]
+        }
+    ],
+    "web_accessible_resources": [
+        {
+            "matches": [
+                "https://www.google.com/*",
+                "https://www.google.co.jp/*"
+            ],
+            "resources": [
+                "js/script.js",
+                "js/utils.js"
+            ]
+
         }
     ]
 }
