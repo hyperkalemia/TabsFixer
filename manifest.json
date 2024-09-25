@@ -2,7 +2,7 @@
     "name": "TabsFixer",
     "version": "1.0.0",
     "manifest_version": 3,
-    "description": "Keep the position of tabs like 'Web', 'Images', 'Shopping', etc. in Google search results consistently fixed.",
+    "description": "Googleの検索結果画面に表示されるタブの順序を固定したり、自由にカスタマイズできます。",
     "icons": {
         "16": "assets/icon_16.png",
         "48": "assets/icon_48.png", 

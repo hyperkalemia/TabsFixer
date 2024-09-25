@@ -6,3 +6,4 @@ js/
 */*.css
 */*.css.map
 biome.json
+lefthook.yml
