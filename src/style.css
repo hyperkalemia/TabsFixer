@@ -9,6 +9,7 @@
 	text-align: center;
 	border: none;
 	user-select: none;
+	touch-action: none;
 }
 
 body {
@@ -58,8 +59,8 @@ body {
 	cursor: grab;
 }
 
-.tabs-box div.tab-bar {
-	cursor: auto;
+.tabs-box div.separator {
+	cursor: default;
 }
 
 .tabs-box div.inactive {

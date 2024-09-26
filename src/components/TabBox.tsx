@@ -1,6 +1,6 @@
-// import { useState } from 'react';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import classNames from 'classnames';
-import type { FC } from 'react';
 import type { TabClassesType } from '../utils';
 import { tabsData } from '../utils';
 
@@ -9,16 +9,30 @@ type TabBoxProps = {
 	isActive: boolean;
 };
 
-const TabBox: FC<TabBoxProps> = (props) => {
-	// const [isActive, setIsActive] = useState(props.isActive);
-	// const toggleActive = (prevState: boolean) => setIsActive(!prevState);
-	const label = props.name !== 'tab-bar' ? tabsData[props.name]?.label : '- 非表示のタブ -';
+const TabBox = ({ name, isActive }: TabBoxProps) => {
+	const isSeparator: boolean = name === 'separator';
+
+	const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+		id: name,
+		disabled: isSeparator,
+	});
+	const style = {
+		transform: CSS.Transform.toString(transform),
+		transition,
+	};
+
+	const label = !isSeparator ? tabsData[name]?.label : '- 非表示のタブ -';
 	const classes = classNames('tab', {
 		onGrab: false,
-		inactive: !props.isActive,
+		separator: isSeparator,
+		inactive: !isActive,
 	});
 
-	return <div className={classes}> {label} </div>;
+	return (
+		<div className={classes} ref={setNodeRef} style={style} {...listeners} {...attributes}>
+			{label}
+		</div>
+	);
 };
 
 export default TabBox;

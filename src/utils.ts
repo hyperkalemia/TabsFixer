@@ -32,7 +32,7 @@ export const TabClasses = [
 	'tab-map',
 	'tab-flight',
 	'tab-finance',
-	'tab-bar',
+	'separator',
 ] as const;
 export type TabClassesType = (typeof TabClasses)[number];
 export function isTabClassesType(item: any): item is TabClassesType {
@@ -47,7 +47,7 @@ export const defaultTabsOrder: TabClassesType[] = [
 	'tab-web',
 	'tab-picture',
 	'tab-video',
-	'tab-bar',
+	'separator',
 	'tab-shopping',
 	'tab-news',
 	'tab-book',
