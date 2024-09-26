@@ -1,3 +1,5 @@
+/* eslint @typescript-eslint/no-explicit-any: off */
+
 export const RequestKeys = ['TabsArray'] as const;
 export type RequestKeysType = (typeof RequestKeys)[number];
 export function isRequestKeysType(item: any): item is RequestKeysType {
