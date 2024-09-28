@@ -1,4 +1,6 @@
-export const RequestKeys = ['TabsArray'] as const;
+/* eslint @typescript-eslint/no-explicit-any: off */
+
+const RequestKeys = ['TabsArray'] as const;
 export type RequestKeysType = (typeof RequestKeys)[number];
 export function isRequestKeysType(item: any): item is RequestKeysType {
 	return RequestKeys.indexOf(item as RequestKeysType) !== -1;
@@ -19,7 +21,7 @@ export function isRequestMessageType(item: any): item is RequestMessageType {
 	);
 }
 
-export const TabClasses = [
+const TabClasses = [
 	'tab-all',
 	'tab-web',
 	'tab-picture',
@@ -30,7 +32,7 @@ export const TabClasses = [
 	'tab-map',
 	'tab-flight',
 	'tab-finance',
-	'tab-bar',
+	'separator',
 ] as const;
 export type TabClassesType = (typeof TabClasses)[number];
 export function isTabClassesType(item: any): item is TabClassesType {
@@ -45,7 +47,7 @@ export const defaultTabsOrder: TabClassesType[] = [
 	'tab-web',
 	'tab-picture',
 	'tab-video',
-	'tab-bar',
+	'separator',
 	'tab-shopping',
 	'tab-news',
 	'tab-book',
@@ -54,10 +56,13 @@ export const defaultTabsOrder: TabClassesType[] = [
 	'tab-finance',
 ] as const;
 
-export const TabLabels = ['すべて', 'ウェブ', '画像', '動画', 'ショッピング', 'ニュース', '書籍', '地図', 'フライト', '金融'] as const;
+const TabLabels = ['すべて', 'ウェブ', '画像', '動画', 'ショッピング', 'ニュース', '書籍', '地図', 'フライト', '金融'] as const;
 export type TabLabelsType = (typeof TabLabels)[number];
+export function isTabLabels(item: any): item is TabLabelsType {
+	return TabLabels.indexOf(item as TabLabelsType) !== -1;
+}
 
-export type TabDataType = {
+type TabDataType = {
 	[key in TabClassesType]?: {
 		label: TabLabelsType;
 		val: string | null;
@@ -111,24 +116,31 @@ export function debug(...arg: any) {
 	console.log('[DEBUG]', ...arg);
 }
 
-export async function searchForElement(name: string, intervalMs: number = 1000, maxAttempts: number = 3): Promise<HTMLElement | null> {
-	let attempts = 0;
-	while (attempts < maxAttempts || maxAttempts === undefined) {
-		const element = document.querySelector(name);
-		if (element !== null) return element as HTMLElement;
+export function getCurrentUrl() {
+	const currentUrl = new URL(window.location.href);
+	const searchParams = new URLSearchParams(currentUrl.search);
+	const qValue = searchParams.get('q');
+	const newUrl = new URL(currentUrl.origin + currentUrl.pathname);
+	if (qValue !== null) newUrl.searchParams.append('q', qValue);
 
-		attempts++;
-		await new Promise((resolve) => setTimeout(resolve, intervalMs));
+	let currentParamVal = 'search';
+	const udmValue = searchParams.get('udm');
+	if (udmValue !== null) {
+		currentParamVal = 'udm=' + udmValue;
+	} else {
+		const tbmValue = searchParams.get('tbm');
+		if (tbmValue !== null) {
+			currentParamVal = 'tbm=' + tbmValue;
+		}
 	}
-	return null;
+	const cleanUrl = newUrl.href;
+
+	return { cleanUrl: cleanUrl, currentParamVal: currentParamVal };
 }
 
-export async function getLocalValue(key: RequestKeysType): Promise<any> {
+export async function getLocalValue(key: RequestKeysType) {
 	return await chrome.storage.local.get(key).then((res) => res[key]);
 }
-
-export async function setLocalValue(key: RequestKeysType, value: any): Promise<void> {
-	await chrome.storage.local.set({
-		[key]: value,
-	});
+export async function setLocalValue(key: RequestKeysType, value: any) {
+	return await chrome.storage.local.set({ [key]: value });
 }

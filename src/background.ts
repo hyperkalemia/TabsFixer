@@ -1,5 +1,5 @@
-import { isRequestMessageType } from './utils.js';
 import type { RequestMessageType } from './utils.js';
+import { isRequestMessageType } from './utils.js';
 
 chrome.runtime.onMessage.addListener((request: unknown, sender) => {
 	if (sender.id !== chrome.runtime.id || !isRequestMessageType(request) || request.target !== 'background') return;
