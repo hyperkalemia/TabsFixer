@@ -1,18 +1,12 @@
-import '../style.css';
-import type { DragOverEvent } from '@dnd-kit/core';
-import { DndContext } from '@dnd-kit/core';
+import { DndContext, type DragOverEvent } from '@dnd-kit/core';
 import { restrictToParentElement, restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { SortableContext } from '@dnd-kit/sortable';
-import { useState } from 'react';
-import type { TabClassesType } from '../utils';
-import { defaultTabsOrder, isTabClassesType, isTabClassesTypeArray } from '../utils';
+import '../style.css';
+import { type RequestMessageType, type TabClassesType, defaultTabsOrder, getLocalValue, isTabClassesType, useLocalStorage } from '../utils';
 import TabBox from './TabBox';
 
 function App() {
-	// const localValue: unknown = (async () => await getLocalValue('TabsArray'))();
-	const localValue = null;
-	const tabsOrder_: TabClassesType[] = isTabClassesTypeArray(localValue) ? localValue : defaultTabsOrder;
-	const [tabsOrder, setTabsOrder] = useState(tabsOrder_);
+	const [tabsOrder, setTabsOrder] = useLocalStorage('TabsArray', defaultTabsOrder);
 
 	let isActive: boolean = true;
 	const GenerateTabBox = (order: TabClassesType[]) => {
@@ -44,14 +38,23 @@ function App() {
 			if (!isTabClassesType(active.id) || !isTabClassesType(over.id)) return;
 			const active_id = active.id as TabClassesType;
 			const over_id = over.id as TabClassesType;
-			setTabsOrder((prevOrder) => reorderArray(prevOrder, active_id, over_id));
+			setTabsOrder((prevOrder: TabClassesType[]) => reorderArray(prevOrder, active_id, over_id));
 		}
+	};
+
+	const handleDragEnd = async () => {
+		const localValue = await getLocalValue('TabsArray');
+		await chrome.runtime.sendMessage<RequestMessageType>({
+			target: 'background',
+			key: 'TabsArray',
+			value: localValue,
+		});
 	};
 
 	return (
 		<>
 			<div className='title'>【 TabsFixer 】</div>
-			<DndContext onDragOver={handleDragOver} modifiers={[restrictToVerticalAxis, restrictToParentElement]}>
+			<DndContext onDragOver={handleDragOver} onDragEnd={handleDragEnd} modifiers={[restrictToVerticalAxis, restrictToParentElement]}>
 				<div className='tabs-box'>
 					<SortableContext items={tabsOrder}>{GenerateTabBox(tabsOrder)}</SortableContext>
 				</div>

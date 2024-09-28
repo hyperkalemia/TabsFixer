@@ -38,8 +38,6 @@ lefthook.yml
 *.tsbuildinfo
 *.mjs
 src/vite-env.d.ts
-# js/
-# */*.css
-# */*.css.map
-
-
+*/*.css
+*/*.css.map
+src/TypedStorage.ts
