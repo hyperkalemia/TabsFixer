@@ -26,10 +26,10 @@
                 "https://www.google.co.jp/*"
             ],
             "js": [
-                "misc/js/loader.js"
+                "dist/assets/index-CY4DvFSo.js"
             ],
             "css": [
-                "misc/css/style.css"
+                "dist/assets/index-Bm37l_jF.css"
             ]
         }
     ],

@@ -1,7 +1,5 @@
 /* eslint @typescript-eslint/no-explicit-any: off */
 
-import { useEffect, useState } from 'react';
-
 const RequestKeys = ['TabsArray'] as const;
 export type RequestKeysType = (typeof RequestKeys)[number];
 export function isRequestKeysType(item: any): item is RequestKeysType {
@@ -118,16 +116,26 @@ export function debug(...arg: any) {
 	console.log('[DEBUG]', ...arg);
 }
 
-export async function searchForElement(name: string, intervalMs: number = 1000, maxAttempts: number = 3): Promise<HTMLElement | null> {
-	let attempts = 0;
-	while (attempts < maxAttempts || maxAttempts === undefined) {
-		const element = document.querySelector(name);
-		if (element !== null) return element as HTMLElement;
+export function getCurrentUrl() {
+	const currentUrl = new URL(window.location.href);
+	const searchParams = new URLSearchParams(currentUrl.search);
+	const qValue = searchParams.get('q');
+	const newUrl = new URL(currentUrl.origin + currentUrl.pathname);
+	if (qValue !== null) newUrl.searchParams.append('q', qValue);
 
-		attempts++;
-		await new Promise((resolve) => setTimeout(resolve, intervalMs));
+	let currentParamVal = 'search';
+	const udmValue = searchParams.get('udm');
+	if (udmValue !== null) {
+		currentParamVal = 'udm=' + udmValue;
+	} else {
+		const tbmValue = searchParams.get('tbm');
+		if (tbmValue !== null) {
+			currentParamVal = 'tbm=' + tbmValue;
+		}
 	}
-	return null;
+	const cleanUrl = newUrl.href;
+
+	return { cleanUrl: cleanUrl, currentParamVal: currentParamVal };
 }
 
 export async function getLocalValue(key: RequestKeysType) {
@@ -136,23 +144,3 @@ export async function getLocalValue(key: RequestKeysType) {
 export async function setLocalValue(key: RequestKeysType, value: any) {
 	return await chrome.storage.local.set({ [key]: value });
 }
-
-export const useLocalStorage = (key: RequestKeysType, defaultValue: any) => {
-	const [value, setValue] = useState(defaultValue);
-
-	useEffect(() => {
-		(async () => {
-			const localValue = await getLocalValue(key);
-			const initialValue = isTabClassesTypeArray(localValue) ? localValue : defaultValue;
-			setValue(initialValue);
-		})();
-	}, [key, defaultValue]);
-
-	useEffect(() => {
-		(async () => {
-			await setLocalValue(key, value);
-		})();
-	}, [key, value]);
-
-	return [value, setValue];
-};

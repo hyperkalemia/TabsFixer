@@ -1,8 +1,8 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import classNames from 'classnames';
+import { type TabClassesType, tabsData } from '../../utils';
 import '../style.css';
-import { type TabClassesType, tabsData } from '../utils';
 
 type TabBoxProps = {
 	name: TabClassesType;
