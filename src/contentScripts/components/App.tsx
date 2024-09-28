@@ -15,9 +15,9 @@ const App = () => {
 		})();
 		const handleMessage = (request: unknown, sender: chrome.runtime.MessageSender) => {
 			if (sender.id !== chrome.runtime.id || !isRequestMessageType(request) || request.target !== 'contentScript') return;
-			if (request.key === 'TabsArray') setTabsOrder(request.value);
-			chrome.runtime.onMessage.addListener(handleMessage);
+			if (request.key === 'TabsArray' && isTabClassesTypeArray(request.value)) setTabsOrder(request.value);
 		};
+		chrome.runtime.onMessage.addListener(handleMessage);
 		// クリーンアップ関数
 		return () => {
 			chrome.runtime.onMessage.removeListener(handleMessage);

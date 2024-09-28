@@ -1,13 +1,14 @@
-div.crJ18e,
-div.nfdoRb {
-    visibility: hidden;
-}
+div.nfdoRb,
+div.crJ18e {
 
-div.sSeWs,
-div.qogDvd {
+    :not(.tabsfixer-container, .tab) {
+        visibility: hidden;
+    }
+
     .tabsfixer-container {
 
         display: flex;
+        height: 42px;
         font-size: 14px;
         font-weight: bold;
 

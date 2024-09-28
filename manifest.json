@@ -4,15 +4,15 @@
     "manifest_version": 3,
     "description": "Googleの検索結果画面に表示されるタブの順序を固定したり、自由にカスタマイズできます。",
     "icons": {
-        "16": "public/icon_16.png",
-        "48": "public/icon_48.png", 
-        "128": "public/icon_128.png"
+        "16": "icon_16.png",
+        "48": "icon_48.png", 
+        "128": "icon_128.png"
     },
     "action": {
-        "default_popup": "dist/index.html"
+        "default_popup": "index.html"
     },
     "background": {
-        "service_worker": "misc/js/background.js",
+        "service_worker": "assets/index-CiwRBHb_.js",
         "type": "module"
     },
     "permissions": [
@@ -26,24 +26,11 @@
                 "https://www.google.co.jp/*"
             ],
             "js": [
-                "dist/assets/index-CY4DvFSo.js"
+                "assets/index-DVOxZRY_.js"
             ],
             "css": [
-                "dist/assets/index-Bm37l_jF.css"
+                "assets/index-Bcks7Y_w.css"
             ]
-        }
-    ],
-    "web_accessible_resources": [
-        {
-            "matches": [
-                "https://www.google.com/*",
-                "https://www.google.co.jp/*"
-            ],
-            "resources": [
-                "misc/js/script.js",
-                "misc/js/utils.js"
-            ]
-
         }
     ]
 }

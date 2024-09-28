@@ -37,7 +37,7 @@ biome.json
 lefthook.yml
 *.tsbuildinfo
 *.mjs
-src/vite-env.d.ts
 */*/*.css
 */*/*.css.map
-src/TypedStorage.ts
+src/vite-env.d.ts
+

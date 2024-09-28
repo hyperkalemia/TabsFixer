@@ -41,10 +41,6 @@ function App() {
 		});
 	};
 
-	const resetButtonCallback = () => {
-		setTabsOrder(defaultTabsOrder);
-	};
-
 	const reorderArray = (array: TabClassesType[], active: TabClassesType, over: TabClassesType) => {
 		const activeIndex = array.indexOf(active);
 		const overIndex = array.indexOf(over);
@@ -52,6 +48,14 @@ function App() {
 		newArray.splice(activeIndex, 1);
 		newArray.splice(overIndex, 0, active);
 		return newArray;
+	};
+
+	const sendMessage = async (value: TabClassesType[]) => {
+		await chrome.runtime.sendMessage<RequestMessageType>({
+			target: 'background',
+			key: 'TabsArray',
+			value: value,
+		});
 	};
 
 	const handleDragOver = (event: DragOverEvent) => {
@@ -66,11 +70,12 @@ function App() {
 
 	const handleDragEnd = async () => {
 		const localValue = await getLocalValue('TabsArray');
-		await chrome.runtime.sendMessage<RequestMessageType>({
-			target: 'background',
-			key: 'TabsArray',
-			value: localValue,
-		});
+		if (isTabClassesTypeArray(localValue)) await sendMessage(localValue);
+	};
+
+	const resetButtonCallback = async () => {
+		setTabsOrder(defaultTabsOrder);
+		await sendMessage(defaultTabsOrder);
 	};
 
 	return (
