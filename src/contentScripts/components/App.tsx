@@ -47,11 +47,15 @@ const App = () => {
 		return order.map((tabClass) => {
 			if (tabClass === 'separator') skip = true;
 			if (skip || !tabsData[tabClass]) return <></>;
+			let isActive = tabsData[tabClass].val === currentParamVal;
+			if (tabClass === 'tab-video' && currentParamVal === 'udm=7') isActive = true;
 			const classes = classNames('tab', {
-				active: tabsData[tabClass].val === currentParamVal,
+				active: isActive,
 			});
 			let href = url + '&' + tabsData[tabClass].val;
-			if (tabsData[tabClass].val && !tabsData[tabClass].val.includes('=')) href = url.replace('search', tabsData[tabClass].val);
+			if (tabsData[tabClass].val && !tabsData[tabClass].val.includes('=')) {
+				href = url.replace('search', tabsData[tabClass].val);
+			}
 
 			return (
 				<a key={tabClass} className={classes} href={href}>

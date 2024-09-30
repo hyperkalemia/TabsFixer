@@ -3,6 +3,10 @@ import { getCurrentUrl } from '../utils.ts';
 import App from './components/App.tsx';
 
 const { currentParamVal } = getCurrentUrl();
-const classname = currentParamVal.startsWith('tbm') ? '.nfdoRb' : '.crJ18e';
-const targetElement = document.querySelector(classname);
+let classname = currentParamVal.startsWith('tbm') ? '.nfdoRb' : '.crJ18e';
+let targetElement = document.querySelector(classname);
+if (!targetElement) {
+	classname = currentParamVal.startsWith('tbm') ? '.nGmbUc' : '.ZaDUCc';
+	targetElement = document.querySelector(classname);
+}
 if (targetElement) createRoot(targetElement).render(<App />);

@@ -69,7 +69,7 @@ function App() {
 	};
 
 	const handleDragEnd = async () => {
-		const localValue = await getLocalValue('TabsArray');
+		const localValue: unknown = await getLocalValue('TabsArray');
 		if (isTabClassesTypeArray(localValue)) await sendMessage(localValue);
 	};
 

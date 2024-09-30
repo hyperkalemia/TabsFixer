@@ -108,7 +108,7 @@ export const tabsData: TabDataType = {
 	},
 	'tab-finance': {
 		label: '金融',
-		val: null,
+		val: 'finance',
 	},
 };
 
