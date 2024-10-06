@@ -24,20 +24,14 @@ dist-ssr
 *.sw?
 
 #
-misc/
-package.json
-package-lock.json
+*.css
+*.css.map
+README.md
+product.zip
 tsconfig.json
 tsconfig.app.json
 tsconfig.node.json
-vite.config.ts
-README.md
+*.tsbuildinfo
 eslint.config.js
 biome.json
 lefthook.yml
-*.tsbuildinfo
-*.mjs
-*/*/*.css
-*/*/*.css.map
-src/vite-env.d.ts
-
