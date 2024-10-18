@@ -1,11 +1,10 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import classNames from 'classnames';
-import { type TabClassesType, tabsData } from '../../utils';
-import '../style.css';
+import { type TabClasses, tabsData } from '../../types';
 
 type TabBoxProps = {
-	name: TabClassesType;
+	name: TabClasses;
 	isActive: boolean;
 };
 
@@ -21,7 +20,7 @@ const TabBox = ({ name, isActive }: TabBoxProps) => {
 		transition,
 	};
 
-	const label = !isSeparator ? tabsData[name]?.label : '- 非表示のタブ -';
+	const label = name !== 'separator' ? tabsData[name]?.label : '- 非表示のタブ -';
 	const classes = classNames('tab', {
 		separator: isSeparator,
 		onGrab: isDragging,

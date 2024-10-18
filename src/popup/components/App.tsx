@@ -2,16 +2,8 @@ import { DndContext, type DragOverEvent } from '@dnd-kit/core';
 import { restrictToParentElement, restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { SortableContext } from '@dnd-kit/sortable';
 import { useEffect, useState } from 'react';
-import {
-	type RequestMessageType,
-	type TabClassesType,
-	defaultTabsOrder,
-	getLocalValue,
-	isTabClassesType,
-	isTabClassesTypeArray,
-	setLocalValue,
-} from '../../utils';
-import '../style.css';
+import { defaultTabsOrder, type RequestMessage, type TabClasses, TabClassesArraySchema, TabClassesSchema, zodValidate } from '../../types';
+import { getLocalValue, setLocalValue } from '../../utils';
 import TabBox from './TabBox';
 
 function App() {
@@ -20,7 +12,7 @@ function App() {
 	useEffect(() => {
 		(async () => {
 			const localValue: unknown = await getLocalValue('TabsArray');
-			const initialValue = isTabClassesTypeArray(localValue) ? localValue : defaultTabsOrder;
+			const initialValue = zodValidate(TabClassesArraySchema, localValue) ? localValue : defaultTabsOrder;
 			setTabsOrder(initialValue);
 		})();
 	}, []);
@@ -32,7 +24,7 @@ function App() {
 	}, [tabsOrder]);
 
 	let isActive: boolean = true;
-	const generateTabBox = (order: TabClassesType[]) => {
+	const generateTabBox = (order: TabClasses[]) => {
 		return order.map((className) => {
 			if (className === 'separator') {
 				isActive = false;
@@ -41,36 +33,37 @@ function App() {
 		});
 	};
 
-	const reorderArray = (array: TabClassesType[], active: TabClassesType, over: TabClassesType) => {
+	const reorderArray = (array: TabClasses[], active: TabClasses, over: TabClasses) => {
 		const activeIndex = array.indexOf(active);
 		const overIndex = array.indexOf(over);
-		const newArray: TabClassesType[] = [...array];
+		const newArray: TabClasses[] = [...array];
 		newArray.splice(activeIndex, 1);
 		newArray.splice(overIndex, 0, active);
 		return newArray;
 	};
 
-	const sendMessage = async (value: TabClassesType[]) => {
-		await chrome.runtime.sendMessage<RequestMessageType>({
+	const sendMessage = async (value: TabClasses[]) => {
+		await chrome.runtime.sendMessage<RequestMessage>({
 			target: 'background',
-			key: 'TabsArray',
-			value: value,
+			content: {
+				TabsArray: value,
+			},
 		});
 	};
 
 	const handleDragOver = (event: DragOverEvent) => {
 		const { over, active } = event;
 		if (over && active && over.id !== active.id) {
-			if (!isTabClassesType(active.id) || !isTabClassesType(over.id)) return;
-			const active_id = active.id as TabClassesType;
-			const over_id = over.id as TabClassesType;
-			setTabsOrder((prevOrder: TabClassesType[]) => reorderArray(prevOrder, active_id, over_id));
+			if (!zodValidate(TabClassesSchema, active.id) || !zodValidate(TabClassesSchema, over.id)) return;
+			const active_id = active.id as TabClasses;
+			const over_id = over.id as TabClasses;
+			setTabsOrder((prevOrder: TabClasses[]) => reorderArray(prevOrder, active_id, over_id));
 		}
 	};
 
 	const handleDragEnd = async () => {
 		const localValue: unknown = await getLocalValue('TabsArray');
-		if (isTabClassesTypeArray(localValue)) await sendMessage(localValue);
+		if (zodValidate(TabClassesArraySchema, localValue)) await sendMessage(localValue);
 	};
 
 	const resetButtonCallback = async () => {

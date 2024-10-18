@@ -1,21 +1,23 @@
 import classNames from 'classnames';
 import { useEffect, useState } from 'react';
-import { type TabClassesType, defaultTabsOrder, getCurrentUrl, getLocalValue, isRequestMessageType, isTabClassesTypeArray, tabsData } from '../../utils';
-import '../style.css';
+import { RequestMessageSchema, type TabClasses, TabClassesArraySchema, defaultTabsOrder, tabsData, zodValidate } from '../../types';
+import { getCurrentUrl, getLocalValue } from '../../utils';
 
 const App = () => {
 	const { cleanUrl, currentParamVal } = getCurrentUrl();
-	const [tabsOrder, setTabsOrder] = useState([] as TabClassesType[]);
+	const [tabsOrder, setTabsOrder] = useState([] as TabClasses[]);
 
 	useEffect(() => {
 		(async () => {
 			const localValue: unknown = await getLocalValue('TabsArray');
-			const initialValue = isTabClassesTypeArray(localValue) ? localValue : defaultTabsOrder;
+			const initialValue = zodValidate(TabClassesArraySchema, localValue) ? localValue : defaultTabsOrder;
 			setTabsOrder(initialValue);
 		})();
 		const handleMessage = (request: unknown, sender: chrome.runtime.MessageSender) => {
-			if (sender.id !== chrome.runtime.id || !isRequestMessageType(request) || request.target !== 'contentScript') return;
-			if (request.key === 'TabsArray' && isTabClassesTypeArray(request.value)) setTabsOrder(request.value);
+			if (sender.id !== chrome.runtime.id || !zodValidate(RequestMessageSchema, request) || request.target !== 'contentScripts') return;
+			for (const [key, value] of Object.entries(request.content)) {
+				if (key === 'TabsArray') setTabsOrder(value);
+			}
 		};
 		chrome.runtime.onMessage.addListener(handleMessage);
 		// クリーンアップ関数
@@ -41,12 +43,14 @@ const App = () => {
 		darkmode: darkmode,
 	});
 
-	const generateElement = (order: TabClassesType[], url: string, currentParamVal: string) => {
+	const generateElement = (order: TabClasses[], url: string, currentParamVal: string) => {
 		if (order.length === 0) return <div className='tab loading'>loading...</div>;
 		let skip = false;
 		return order.map((tabClass) => {
-			if (tabClass === 'separator') skip = true;
-			if (skip || !tabsData[tabClass]) return <></>;
+			if (skip || tabClass === 'separator') {
+				skip = true;
+				return <></>;
+			}
 			let isActive = tabsData[tabClass].val === currentParamVal;
 			if (tabClass === 'tab-video' && currentParamVal === 'udm=7') isActive = true;
 			const classes = classNames('tab', {

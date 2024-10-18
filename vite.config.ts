@@ -23,11 +23,12 @@ export default defineConfig({
         publicDir: 'public',
         plugins: [react()],
         server: {
-            host: true,
+            open: './dev.html',
+            host: true
         },
         build: {
             outDir: "./dist",
-            emptyOutDir: entryName === "contentScripts" ? true : false,
+            emptyOutDir: entryName === "contentScripts",
             rollupOptions: {
                 input: input_[entryName],
                 output: {

@@ -27,6 +27,7 @@ dist-ssr
 *.css
 *.css.map
 README.md
+dev.html
 product.zip
 tsconfig.json
 tsconfig.app.json
