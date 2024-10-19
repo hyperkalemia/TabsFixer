@@ -1,22 +1,15 @@
 import { z } from 'zod';
 
-const zodLiteralRecord = <KeyType extends string, ZodValueType extends z.ZodType>(
-	keys: KeyType[],
-	zodValueType: ZodValueType | ((key: KeyType) => ZodValueType),
-) => {
-	return z.object(
-		keys.reduce(
-			(memo, k) => {
-				const valueType = typeof zodValueType === 'function' ? zodValueType(k) : zodValueType;
-				return Object.assign(memo, { [k]: valueType });
-			},
-			{} as Record<KeyType, ZodValueType>,
-		),
-	);
+const zodLiteralRecord = <KeyType extends string, ZodValueType extends z.ZodType>(keys: KeyType[], zodValueType: ZodValueType) => {
+	return z.object(keys.reduce((memo, k) => Object.assign(memo, { [k]: zodValueType }), {} as Record<KeyType, ZodValueType>));
 };
 
 export const zodValidate = <T extends z.ZodType>(zodSchema: T, value: unknown): value is z.infer<T> => {
 	return zodSchema.safeParse(value).success;
+};
+
+export const configValidate = <T extends ConfigKeys>(key: T, value: unknown): value is z.infer<(typeof ConfigSchema.shape)[T]> => {
+	return ConfigSchema.shape[key].safeParse(value).success;
 };
 
 const TabClassesEnum = [
@@ -37,7 +30,7 @@ export type TabClasses = z.infer<typeof TabClassesSchema>;
 
 export const TabClassesArraySchema = z.array(TabClassesSchema).length(TabClassesEnum.length);
 export type TabClassesArray = z.infer<typeof TabClassesArraySchema>;
-export const defaultTabsOrder: TabClassesArray = [
+const defaultTabsOrder: TabClassesArray = [
 	'tab-all',
 	'tab-web',
 	'tab-picture',
@@ -106,18 +99,13 @@ export const tabsData: TabData = {
 	},
 };
 
-const ConfigKeysEnum = ['TabsArray'] as const;
-export const ConfigKeysSchema = z.enum(ConfigKeysEnum);
-export type ConfigKeys = z.infer<typeof ConfigKeysSchema>;
-
-export const ConfigTypeMap = (key: ConfigKeys) => {
-	if (key === 'TabsArray') return TabClassesArraySchema.optional();
-	return z.undefined();
-};
-export const ConfigSchema = zodLiteralRecord([...ConfigKeysEnum], ConfigTypeMap);
+export const ConfigSchema = z.object({
+	TabsArray: TabClassesArraySchema.optional(),
+});
 export type Config = z.infer<typeof ConfigSchema>;
+export type ConfigKeys = keyof Config;
 
-export const defaultValueOfKey: Config = {
+export const defaultConfig: Config = {
 	TabsArray: defaultTabsOrder,
 };
 

@@ -2,17 +2,17 @@ import { DndContext, type DragOverEvent } from '@dnd-kit/core';
 import { restrictToParentElement, restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { SortableContext } from '@dnd-kit/sortable';
 import { useEffect, useState } from 'react';
-import { defaultTabsOrder, type RequestMessage, type TabClasses, TabClassesArraySchema, TabClassesSchema, zodValidate } from '../../types';
+import { defaultConfig, type RequestMessage, type TabClasses, TabClassesArraySchema, TabClassesSchema, zodValidate } from '../../types';
 import { getLocalValue, setLocalValue } from '../../utils';
 import TabBox from './TabBox';
 
 function App() {
-	const [tabsOrder, setTabsOrder] = useState(defaultTabsOrder);
+	const [tabsOrder, setTabsOrder] = useState(defaultConfig.TabsArray!);
 
 	useEffect(() => {
 		(async () => {
 			const localValue: unknown = await getLocalValue('TabsArray');
-			const initialValue = zodValidate(TabClassesArraySchema, localValue) ? localValue : defaultTabsOrder;
+			const initialValue = zodValidate(TabClassesArraySchema, localValue) ? localValue : defaultConfig.TabsArray!;
 			setTabsOrder(initialValue);
 		})();
 	}, []);
@@ -67,8 +67,8 @@ function App() {
 	};
 
 	const resetButtonCallback = async () => {
-		setTabsOrder(defaultTabsOrder);
-		await sendMessage(defaultTabsOrder);
+		setTabsOrder(defaultConfig.TabsArray!);
+		await sendMessage(defaultConfig.TabsArray!);
 	};
 
 	return (

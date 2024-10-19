@@ -1,6 +1,6 @@
 import classNames from 'classnames';
 import { useEffect, useState } from 'react';
-import { RequestMessageSchema, type TabClasses, TabClassesArraySchema, defaultTabsOrder, tabsData, zodValidate } from '../../types';
+import { defaultConfig, RequestMessageSchema, type TabClasses, TabClassesArraySchema, tabsData, zodValidate } from '../../types';
 import { getCurrentUrl, getLocalValue } from '../../utils';
 
 const App = () => {
@@ -10,7 +10,7 @@ const App = () => {
 	useEffect(() => {
 		(async () => {
 			const localValue: unknown = await getLocalValue('TabsArray');
-			const initialValue = zodValidate(TabClassesArraySchema, localValue) ? localValue : defaultTabsOrder;
+			const initialValue = zodValidate(TabClassesArraySchema, localValue) ? localValue : defaultConfig.TabsArray!;
 			setTabsOrder(initialValue);
 		})();
 		const handleMessage = (request: unknown, sender: chrome.runtime.MessageSender) => {

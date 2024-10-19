@@ -1,4 +1,4 @@
-import { ConfigTypeMap, zodValidate, type Config, type ConfigKeys } from './types';
+import { type Config, type ConfigKeys, configValidate } from './types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function debug(...arg: any) {
@@ -28,7 +28,7 @@ export function getCurrentUrl() {
 }
 
 export async function getLocalValue<K extends ConfigKeys>(key: K): Promise<Config[K] | null> {
-	return await chrome.storage.local.get(key).then((res) => (zodValidate(ConfigTypeMap(key), res[key]) ? res[key] : null));
+	return await chrome.storage.local.get(key).then((res) => (configValidate(key, res[key]) ? res[key] : null));
 }
 export async function setLocalValue<K extends ConfigKeys>(key: K, value: Config[K]) {
 	return await chrome.storage.local.set({ [key]: value });

@@ -1,26 +1,36 @@
 {
-	"name": "TabsFixer",
-	"version": "2.0.1",
-	"manifest_version": 3,
-	"description": "Googleの検索結果画面に表示されるタブの順序を固定したり、自由にカスタマイズできます。",
-	"icons": {
-		"16": "assets/icon_16.png",
-		"48": "assets/icon_48.png",
-		"128": "assets/icon_128.png"
-	},
-	"action": {
-		"default_popup": "index.html"
-	},
+    "name": "TabsFixer",
+    "version": "2.0.2",
+    "manifest_version": 3,
+    "description": "Googleの検索結果画面に表示されるタブの順序を固定したり、自由にカスタマイズできます。",
+    "icons": {
+        "16": "assets/icon_16.png",
+        "48": "assets/icon_48.png",
+        "128": "assets/icon_128.png"
+    },
+    "action": {
+        "default_popup": "index.html"
+    },
     "background": {
         "service_worker": "js/background.js",
         "type": "module"
     },
-	"permissions": ["storage", "tabs"],
-	"content_scripts": [
-		{
-			"matches": ["https://www.google.com/*", "https://www.google.co.jp/*"],
-			"js": ["js/contentScripts.js"],
-			"css": ["css/contentScripts.css"]
-		}
-	]
+    "permissions": [
+        "storage",
+        "tabs"
+    ],
+    "content_scripts": [
+        {
+            "matches": [
+                "https://www.google.com/*",
+                "https://www.google.co.jp/*"
+            ],
+            "js": [
+                "js/contentScripts.js"
+            ],
+            "css": [
+                "css/contentScripts.css"
+            ]
+        }
+    ]
 }
