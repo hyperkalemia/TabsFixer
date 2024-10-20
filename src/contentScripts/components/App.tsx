@@ -1,16 +1,16 @@
 import classNames from 'classnames';
 import { useEffect, useState } from 'react';
-import { defaultConfig, RequestMessageSchema, type TabClasses, TabClassesArraySchema, tabsData, zodValidate } from '../../types';
+import { defaultConfig, RequestMessageSchema, type TabClasses, tabsData, zodValidate } from '../../types';
 import { getCurrentUrl, getLocalValue } from '../../utils';
 
 const App = () => {
 	const { cleanUrl, currentParamVal } = getCurrentUrl();
-	const [tabsOrder, setTabsOrder] = useState([] as TabClasses[]);
+	const [tabsOrder, setTabsOrder] = useState<TabClasses[]>([]);
 
 	useEffect(() => {
 		(async () => {
-			const localValue: unknown = await getLocalValue('TabsArray');
-			const initialValue = zodValidate(TabClassesArraySchema, localValue) ? localValue : defaultConfig.TabsArray!;
+			const localValue = await getLocalValue('TabsArray');
+			const initialValue = localValue ?? defaultConfig.TabsArray!;
 			setTabsOrder(initialValue);
 		})();
 		const handleMessage = (request: unknown, sender: chrome.runtime.MessageSender) => {
@@ -36,8 +36,8 @@ const App = () => {
 		return luminance < 128;
 	};
 
-	const bodyElement = document.querySelector('body');
-	const backgroundColor = window.getComputedStyle(bodyElement!).backgroundColor;
+	const bodyElement = document.querySelector('body')!;
+	const backgroundColor = window.getComputedStyle(bodyElement).backgroundColor;
 	const darkmode = isDarkMode(backgroundColor);
 	const classes = classNames('tabsfixer-container', {
 		darkmode: darkmode,

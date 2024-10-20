@@ -8,8 +8,8 @@ export const zodValidate = <T extends z.ZodType>(zodSchema: T, value: unknown): 
 	return zodSchema.safeParse(value).success;
 };
 
-export const configValidate = <T extends ConfigKeys>(key: T, value: unknown): value is z.infer<(typeof ConfigSchema.shape)[T]> => {
-	return ConfigSchema.shape[key].safeParse(value).success;
+export const configValidate = <T extends ConfigKeys>(key: T, value: unknown): value is Exclude<Config[T], undefined> => {
+	return value !== undefined && ConfigSchema.shape[key].safeParse(value).success;
 };
 
 const TabClassesEnum = [

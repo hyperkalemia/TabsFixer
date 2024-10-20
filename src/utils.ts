@@ -2,6 +2,7 @@ import { type Config, type ConfigKeys, configValidate } from './types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function debug(...arg: any) {
+	// biome-ignore lint/suspicious/noConsole: <explanation>
 	console.log('[DEBUG]', ...arg);
 }
 
@@ -27,9 +28,13 @@ export function getCurrentUrl() {
 	return { cleanUrl: cleanUrl, currentParamVal: currentParamVal };
 }
 
-export async function getLocalValue<K extends ConfigKeys>(key: K): Promise<Config[K] | null> {
-	return await chrome.storage.local.get(key).then((res) => (configValidate(key, res[key]) ? res[key] : null));
+export async function getLocalValue<K extends ConfigKeys>(key: K): Promise<Exclude<Config[K], undefined> | null> {
+	return await chrome.storage.local.get(key).then(
+		(res: {
+			[key: string]: unknown;
+		}) => (configValidate(key, res[key]) ? res[key] : null),
+	);
 }
-export async function setLocalValue<K extends ConfigKeys>(key: K, value: Config[K]) {
+export async function setLocalValue<K extends ConfigKeys>(key: K, value: Exclude<Config[K], undefined>) {
 	return await chrome.storage.local.set({ [key]: value });
 }

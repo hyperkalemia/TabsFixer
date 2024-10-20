@@ -18,67 +18,72 @@ div.ZaDUCc:not(.tNYn6d) {
         font-size: 14px;
         font-weight: bold;
 
-        a,
-        a:visited {
-            color: #9c9c9c
-        }
+        a {
 
-        a.active {
-            color: #1a73e8;
-        }
+            &,
+            &:visited {
+                color: #9c9c9c
+            }
 
-        a:not(.active):hover {
-            color: #434343;
-        }
+            &.active {
+                color: #1a73e8;
+            }
 
-        a:hover {
-            text-decoration: none;
+            &:not(.active):hover {
+                color: #434343;
+            }
+
+            &:hover {
+                text-decoration: none;
+            }
         }
 
         .tab {
             padding: 10px 20px;
             border-bottom: 1px solid #9c9c9c;
             cursor: pointer;
-        }
 
-        .tab.active {
-            border-bottom: 3px solid #1a73e8;
-        }
+            &.active {
+                border-bottom: 3px solid #1a73e8;
+            }
 
-        .tab:not(.active):hover {
-            border-bottom: 3px solid #434343
-        }
+            &:not(.active):hover {
+                border-bottom: 3px solid #434343
+            }
 
-        .tab.loading {
-            visibility: hidden;
+            &.loading {
+                visibility: hidden;
+            }
         }
     }
 
     .tabsfixer-container.darkmode {
+        a {
 
-        a,
-        a:visited {
-            color: #9aa0a6
-        }
+            &,
+            &:visited {
+                color: #9aa0a6
+            }
 
-        a.active {
-            color: #1a73e8;
-        }
+            &.active {
+                color: #1a73e8;
+            }
 
-        a:not(.active):hover {
-            color: #ddd;
+            &:not(.active):hover {
+                color: #ddd;
+            }
         }
 
         .tab {
             border-bottom: 1px solid #9aa0a6;
-        }
 
-        .tab.active {
-            border-bottom: 3px solid #1a73e8;
-        }
+            &.active {
+                border-bottom: 3px solid #1a73e8;
+            }
 
-        .tab:not(.active):hover {
-            border-bottom: 3px solid #ddd;
+            &:not(.active):hover {
+                border-bottom: 3px solid #ddd;
+            }
         }
     }
 }

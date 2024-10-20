@@ -2,7 +2,7 @@ import { DndContext, type DragOverEvent } from '@dnd-kit/core';
 import { restrictToParentElement, restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { SortableContext } from '@dnd-kit/sortable';
 import { useEffect, useState } from 'react';
-import { defaultConfig, type RequestMessage, type TabClasses, TabClassesArraySchema, TabClassesSchema, zodValidate } from '../../types';
+import { defaultConfig, type RequestMessage, type TabClasses, TabClassesSchema, zodValidate } from '../../types';
 import { getLocalValue, setLocalValue } from '../../utils';
 import TabBox from './TabBox';
 
@@ -11,8 +11,8 @@ function App() {
 
 	useEffect(() => {
 		(async () => {
-			const localValue: unknown = await getLocalValue('TabsArray');
-			const initialValue = zodValidate(TabClassesArraySchema, localValue) ? localValue : defaultConfig.TabsArray!;
+			const localValue = await getLocalValue('TabsArray');
+			const initialValue = localValue ?? defaultConfig.TabsArray!;
 			setTabsOrder(initialValue);
 		})();
 	}, []);
@@ -23,7 +23,7 @@ function App() {
 		})();
 	}, [tabsOrder]);
 
-	let isActive: boolean = true;
+	let isActive = true;
 	const generateTabBox = (order: TabClasses[]) => {
 		return order.map((className) => {
 			if (className === 'separator') {
@@ -42,8 +42,8 @@ function App() {
 		return newArray;
 	};
 
-	const sendMessage = async (value: TabClasses[]) => {
-		await chrome.runtime.sendMessage<RequestMessage>({
+	const sendMessage = (value: TabClasses[]) => {
+		chrome.runtime.sendMessage<RequestMessage>({
 			target: 'background',
 			content: {
 				TabsArray: value,
@@ -62,13 +62,13 @@ function App() {
 	};
 
 	const handleDragEnd = async () => {
-		const localValue: unknown = await getLocalValue('TabsArray');
-		if (zodValidate(TabClassesArraySchema, localValue)) await sendMessage(localValue);
+		const localValue = await getLocalValue('TabsArray');
+		if (localValue) sendMessage(localValue);
 	};
 
-	const resetButtonCallback = async () => {
+	const resetButtonCallback = () => {
 		setTabsOrder(defaultConfig.TabsArray!);
-		await sendMessage(defaultConfig.TabsArray!);
+		sendMessage(defaultConfig.TabsArray!);
 	};
 
 	return (

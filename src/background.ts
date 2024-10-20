@@ -9,9 +9,9 @@ chrome.runtime.onMessage.addListener((request: unknown, sender) => {
 			url: ['https://www.google.com/*', 'https://www.google.co.jp/*'],
 		},
 		(tabs) => {
-			tabs.forEach(async (tab) => {
+			tabs.forEach((tab) => {
 				const id = tab.id!;
-				await chrome.tabs.sendMessage<RequestMessage>(id, request);
+				chrome.tabs.sendMessage<RequestMessage>(id, request);
 			});
 		},
 	);

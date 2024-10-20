@@ -55,24 +55,24 @@ body {
         height: 28px;
         box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
         cursor: grab;
-    }
 
-    div.separator {
-        cursor: default;
-    }
+        &.separator {
+            cursor: default;
+        }
 
-    div.inactive {
-        background: rgb(33, 33, 33);
-    }
+        &.inactive {
+            background: rgb(33, 33, 33);
+        }
 
-    div.onGrab {
-        width: 93%;
-        box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.15);
-        cursor: grabbing;
-    }
+        &.onGrab {
+            width: 93%;
+            box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.15);
+            cursor: grabbing;
+        }
 
-    div:not(:last-child) {
-        margin-bottom: 3%;
+        &:not(:last-child) {
+            margin-bottom: 3%;
+        }
     }
 }
 
