@@ -82,7 +82,7 @@ export const tabsData: TabData = {
 	},
 	'tab-shopping': {
 		label: 'ショッピング',
-		val: 'tbm=shop',
+		val: 'udm=28',
 	},
 	'tab-news': {
 		label: 'ニュース',
