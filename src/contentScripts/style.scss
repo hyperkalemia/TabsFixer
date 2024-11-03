@@ -55,34 +55,34 @@ div.ZaDUCc:not(.tNYn6d) {
                 visibility: hidden;
             }
         }
-    }
 
-    .tabsfixer-container.darkmode {
-        a {
+        &.darkmode {
+            a {
 
-            &,
-            &:visited {
-                color: #9aa0a6
+                &,
+                &:visited {
+                    color: #9aa0a6
+                }
+
+                &.active {
+                    color: #1a73e8;
+                }
+
+                &:not(.active):hover {
+                    color: #ddd;
+                }
             }
 
-            &.active {
-                color: #1a73e8;
-            }
+            .tab {
+                border-bottom: 1px solid #9aa0a6;
 
-            &:not(.active):hover {
-                color: #ddd;
-            }
-        }
+                &.active {
+                    border-bottom: 3px solid #1a73e8;
+                }
 
-        .tab {
-            border-bottom: 1px solid #9aa0a6;
-
-            &.active {
-                border-bottom: 3px solid #1a73e8;
-            }
-
-            &:not(.active):hover {
-                border-bottom: 3px solid #ddd;
+                &:not(.active):hover {
+                    border-bottom: 3px solid #ddd;
+                }
             }
         }
     }

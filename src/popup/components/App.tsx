@@ -2,7 +2,7 @@ import { DndContext, type DragOverEvent } from '@dnd-kit/core';
 import { restrictToParentElement, restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { SortableContext } from '@dnd-kit/sortable';
 import { useEffect, useState } from 'react';
-import { defaultConfig, type RequestMessage, type TabClasses, TabClassesSchema, zodValidate } from '../../types';
+import { defaultConfig, type RequestMessage, type TabClasses, type TabClassesArray, TabClassesArraySchema, TabClassesSchema, zodValidate } from '../../types';
 import { getLocalValue, setLocalValue } from '../../utils';
 import TabBox from './TabBox';
 
@@ -33,16 +33,17 @@ function App() {
 		});
 	};
 
-	const reorderArray = (array: TabClasses[], active: TabClasses, over: TabClasses) => {
+	const reorderArray = (array: TabClassesArray, active: TabClasses, over: TabClasses): TabClassesArray => {
 		const activeIndex = array.indexOf(active);
 		const overIndex = array.indexOf(over);
 		const newArray: TabClasses[] = [...array];
 		newArray.splice(activeIndex, 1);
 		newArray.splice(overIndex, 0, active);
-		return newArray;
+		return zodValidate(TabClassesArraySchema, newArray) ? newArray : array;
 	};
 
 	const sendMessage = (value: TabClasses[]) => {
+		if (!zodValidate(TabClassesArraySchema, value)) return;
 		chrome.runtime.sendMessage<RequestMessage>({
 			target: 'background',
 			content: {
@@ -57,7 +58,7 @@ function App() {
 			if (!zodValidate(TabClassesSchema, active.id) || !zodValidate(TabClassesSchema, over.id)) return;
 			const active_id = active.id as TabClasses;
 			const over_id = over.id as TabClasses;
-			setTabsOrder((prevOrder: TabClasses[]) => reorderArray(prevOrder, active_id, over_id));
+			setTabsOrder((prevOrder: TabClassesArray) => reorderArray(prevOrder, active_id, over_id));
 		}
 	};
 

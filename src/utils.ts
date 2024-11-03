@@ -6,6 +6,14 @@ export function debug(...arg: any) {
 	console.log('[DEBUG]', ...arg);
 }
 
+export function isPermutation(arr: string[], original: string[]): boolean {
+	const setOriginal = new Set(original);
+	const setArr = new Set(arr);
+	return (
+		arr.length === setArr.size && original.length === setOriginal.size && original.length === arr.length && [...setOriginal].every((item) => setArr.has(item))
+	);
+}
+
 export function getCurrentUrl() {
 	const currentUrl = new URL(window.location.href);
 	const searchParams = new URLSearchParams(currentUrl.search);
